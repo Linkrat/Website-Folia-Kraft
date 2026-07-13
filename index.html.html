@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOLIA & KRAFT — Premium Digital Showcase</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js CDN for WebGL Graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP CDN for high-end micro-animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Google Fonts: Editorial Serif & Minimal Sans-Serif -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: #0f172a;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor to use custom fluid cursor */
+        }
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Glassmorphism panel definitions resembling Lusion interface */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(241, 245, 249, 0.9);
+            box-shadow: 0 8px 32px 0 rgba(148, 163, 184, 0.04);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        .glass-card:hover {
+            border-color: #86efac;
+            box-shadow: 0 20px 40px -15px rgba(34, 197, 94, 0.08);
+        }
+        /* Absolute fullscreen container for WebGL Background */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* Custom scrollbar matching bright aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffffff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #86efac;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-green-100 selection:text-green-800">
+
+    <!-- FLUID CUSTOM CURSORS (Lusion Style) -->
+    <div id="cursor-dot" class="fixed w-2.5 h-2.5 bg-green-500 rounded-full pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 mix-blend-difference transition-transform duration-75 ease-out"></div>
+    <div id="cursor-ring" class="fixed w-12 h-12 border border-green-500/30 rounded-full pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center text-[7px] tracking-[0.25em] text-green-600 font-extrabold uppercase scale-100 opacity-0 transition-all duration-300 ease-out"></div>
+
+    <!-- WEBGL INTERACTIVE CANVAS -->
+    <div id="webgl-container">
+        <canvas id="webgl-canvas" class="w-full h-full"></canvas>
+    </div>
+
+    <!-- MAIN GLOW EFFECTS (Bright, ambient background) -->
+    <div class="fixed top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-gradient-to-tr from-green-100/40 to-emerald-200/30 rounded-full filter blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-gradient-to-tr from-sky-100/30 to-green-100/40 rounded-full filter blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- NAVIGATION HEADER -->
+    <header class="border-b border-slate-100 backdrop-blur-md bg-white/30 sticky top-0 z-40 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-3 group cursor-pointer">
+                <svg class="w-8 h-8 text-green-600 transform group-hover:rotate-12 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 0 8.5C17 15 15 18 11 20z"></path>
+                </svg>
+                <span class="serif-font text-2xl font-bold tracking-tight text-slate-800">FOLIA & KRAFT</span>
+            </a>
+            <nav class="hidden md:flex items-center space-x-10 text-xs uppercase tracking-widest font-semibold text-slate-600">
+                <a href="#exhibition" class="hover:text-green-600 transition">Exhibition</a>
+                <a href="#concept" class="hover:text-green-600 transition">Our Concept</a>
+                <a href="#contact" class="hover:text-green-600 transition">Connect</a>
+            </nav>
+            <a href="#exhibition" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-6 py-3 rounded-full transition shadow-lg shadow-green-600/10 hover:shadow-green-700/20">
+                Explore Grid
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO PANEL -->
+    <section class="relative min-h-[calc(100vh-80px)] flex items-center py-16 px-6 overflow-hidden z-10">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            
+            <div class="space-y-6 max-w-xl">
+                <div class="inline-flex items-center gap-2 bg-green-50 border border-green-100 text-green-700 px-4 py-1.5 rounded-full text-xs font-semibold">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 animate-pulse"></i> Experiential 3D Showcase
+                </div>
+                <h1 class="serif-font text-5xl md:text-7xl font-bold text-slate-900 leading-none tracking-tight">
+                    Pure Digital <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-emerald-500 to-teal-600">Elegance</span>
+                </h1>
+                <p class="text-slate-600 text-base md:text-lg leading-relaxed font-medium">
+                    An aesthetic portal displaying premium digital services. Interact with our reactive 3D paper-thin crystals and navigate exact pricing options smoothly.
+                </p>
+                <div class="pt-4 flex flex-wrap gap-4">
+                    <a href="#exhibition" class="bg-slate-900 hover:bg-slate-800 text-white text-xs uppercase tracking-widest font-bold px-8 py-4 rounded-full transition shadow-xl">
+                        View Products
+                    </a>
+                    <button onclick="trigger3DTurbulence()" class="border border-slate-200 bg-white/80 hover:bg-white text-slate-700 text-xs uppercase tracking-widest font-bold px-6 py-4 rounded-full transition flex items-center gap-2 shadow-sm">
+                        <i data-lucide="wind" class="w-4 h-4"></i> Blow Wind (3D)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty right side to fully display active WebGL paper/leaf cluster behind -->
+            <div class="hidden md:block h-[500px]"></div>
+        </div>
+    </section>
+
+    <!-- SERVICE EXHIBITION -->
+    <section id="exhibition" class="py-32 px-6 bg-white/20 relative z-10 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div class="space-y-3">
+                    <span class="text-xs font-bold text-green-600 uppercase tracking-[0.25em] block">Curated Catalogue</span>
+                    <h2 class="serif-font text-4xl md:text-5xl font-bold text-slate-900">Direct Pricing Tier</h2>
+                </div>
+                
+                <!-- Sleek minimal Search -->
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="search-input" oninput="filterProducts()" placeholder="Type to filter..." class="w-full bg-white/80 border border-slate-200 rounded-full py-4 pl-12 pr-6 text-xs focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 shadow-sm font-medium">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-5 top-4"></i>
+                </div>
+            </div>
+
+            <!-- Category Tab Selection -->
+            <div class="flex flex-wrap gap-2.5 mb-12" id="tabs-container">
+                <!-- Programmatically filled -->
+            </div>
+
+            <!-- Dynamic Product Grid -->
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Cards generated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- THE CONCEPT (Visual & Aesthetic Explanation) -->
+    <section id="concept" class="py-32 px-6 bg-slate-950 text-white relative overflow-hidden z-10">
+        <div class="max-w-5xl mx-auto text-center space-y-8 relative z-10">
+            <span class="text-xs font-bold text-green-400 uppercase tracking-[0.3em] block">Lusion Architecture Concept</span>
+            <h2 class="serif-font text-4xl md:text-6xl font-bold tracking-tight">The Geometry of Folia</h2>
+            <p class="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-loose">
+                Designed with precision, Folia & Kraft implements a custom 3D system simulating translucent organic elements that twist through mathematical turbulence fields. Our minimalist UI maintains pristine information layout while preserving beautiful physical interaction.
+            </p>
+        </div>
+        <!-- Architectural grid style background graphics -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+    </section>
+
+    <!-- FOOTER CONNECT -->
+    <footer id="contact" class="bg-white border-t border-slate-200/80 py-20 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 pb-16 border-b border-slate-100">
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 0 8.5C17 15 15 18 11 20z"></path>
+                    </svg>
+                    <span class="serif-font text-xl font-bold text-slate-800">FOLIA & KRAFT</span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-xs font-medium">
+                    A sleek 3D canvas displaying transparently priced subscription tiers.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-bold text-xs uppercase tracking-widest text-slate-800 mb-4">Direct Navigation</h4>
+                <ul class="space-y-3 text-xs font-semibold text-slate-600">
+                    <li><a href="#exhibition" class="hover:text-green-600 transition">Exhibition Grid</a></li>
+                    <li><a href="#concept" class="hover:text-green-600 transition">Design Narrative</a></li>
+                    <li><a href="#" class="hover:text-green-600 transition">Privacy Protocols</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-xs uppercase tracking-widest text-slate-800 mb-4">Inquire Service</h4>
+                <p class="text-xs text-slate-500 mb-4">Need personalized bulk licensing or corporate custom integrations?</p>
+                <a href="mailto:hello@foliakraft.com" class="inline-flex items-center gap-2 text-xs bg-slate-900 hover:bg-slate-800 text-white font-bold tracking-widest uppercase px-6 py-3.5 rounded-full transition shadow-md">
+                    <i data-lucide="send" class="w-4 h-4"></i> Send Inquiry
+                </a>
+            </div>
+        </div>
+        <div class="pt-8 text-center text-[10px] uppercase tracking-widest font-bold text-slate-400">
+            © 2026 FOLIA & KRAFT. Synthesized with Three.js WebGL & GSAP Engine.
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-950/20 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-panel max-w-md w-full mx-4 rounded-3xl p-8 relative shadow-2xl border border-white/60 transform scale-95 transition-transform duration-300">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-6 right-6 p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            
+            <div class="space-y-6">
+                <div>
+                    <span id="modal-cat" class="text-[10px] font-extrabold text-green-600 uppercase tracking-widest bg-green-50 px-2.5 py-1 rounded-full border border-green-100">CATEGORY</span>
+                    <h3 id="modal-title" class="serif-font text-3xl font-bold text-slate-900 mt-4">Product Name</h3>
+                </div>
+                
+                <p id="modal-note" class="text-xs text-slate-600 leading-relaxed font-medium">Detailed description goes here.</p>
+                
+                <div class="py-4 border-t border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">Standard Price</span>
+                        <span id="modal-price" class="text-2xl font-bold text-green-600">$0.00</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">Provisioning</span>
+                        <span id="modal-duration" class="text-xs font-bold text-slate-700">1 Month Access</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="copyInquiry()" class="flex-grow bg-slate-900 hover:bg-slate-800 text-white text-xs uppercase tracking-widest font-bold py-4 px-6 rounded-full transition flex items-center justify-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Copy Spec Inquiry
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-slate-900 text-white text-xs font-semibold px-6 py-3.5 rounded-xl shadow-2xl translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center gap-2.5">
+        <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
+        <span id="toast-text">Success Message</span>
+    </div>
+
+
+    <!-- SCRIPT INFRASTRUCTURE -->
+    <script>
+        // Curated precise product listings with clear, singular pricing points.
+        const products = [
+            // STREAMING & MOVIES
+            { category: "streaming", catName: "Streaming & Movies", name: "Netflix VN Private (Profile)", price: 3.99, duration: "1 Month", note: "Private, dedicated single profile access with full premium configuration." },
+            { category: "streaming", catName: "Streaming & Movies", name: "Netflix Account (5-Users)", price: 13.99, duration: "1 Month", note: "Full UHD 4K Pre-order account for 5 concurrent users." },
+            { category: "streaming", catName: "Streaming & Movies", name: "Galaxy Play VIP", price: 2.29, duration: "1 Month", note: "Region-locked VIP subscription specifically mapped for Vietnam locations." },
+            { category: "streaming", catName: "Streaming & Movies", name: "VieON VIP Premium", price: 2.29, duration: "1 Month", note: "Region-locked high-definition local streaming library access." },
+            
+            // MUSIC & DISCORD
+            { category: "music", catName: "Music & Discord", name: "Spotify Premium Family", price: 1.99, duration: "1 Month", note: "Official Family invite slot activated seamlessly on your own email." },
+            { category: "music", catName: "Music & Discord", name: "Spotify Premium Individual", price: 2.49, duration: "1 Month", note: "Stable individual configuration, zero podcasts interruptions, full warranty." },
+            { category: "music", catName: "Music & Discord", name: "Discord Nitro Classic", price: 2.49, duration: "1 Month", note: "Authentic, legitimate package activation. Setup requires account credentials." },
+            { category: "music", catName: "Music & Discord", name: "Discord Nitro Boost", price: 4.99, duration: "1 Month", note: "Full tier-two boosts and customization parameters. Setup requires account credentials." },
+            { category: "music", catName: "Music & Discord", name: "Discord Nitro (First Time)", price: 5.99, duration: "3 Months", note: "Event promotional package for accounts over 30 days old with no prior Nitro history." },
+            { category: "music", catName: "Music & Discord", name: "Server Boost Tier 14B", price: 9.99, duration: "1 Month", note: "Instant automatic server boosting directly applied to your server." },
+
+            // ARTIFICIAL INTELLIGENCE
+            { category: "ai", catName: "Artificial Intelligence (AI)", name: "ChatGPT Plus (Team Slot)", price: 4.99, duration: "1 Month", note: "Shared access slot utilizing a collaborative Enterprise Team plan." },
+            { category: "ai", catName: "Artificial Intelligence (AI)", name: "ChatGPT Business Portal", price: 6.99, duration: "1 Month", note: "Commercial-grade shared access via automated Business parameters." },
+            { category: "ai", catName: "Artificial Intelligence (AI)", name: "ChatGPT Plus (Personal)", price: 13.99, duration: "1 Month", note: "Full upgrade applied directly on your personalized OpenAI account, covered by full warranty." },
+            { category: "ai", catName: "Artificial Intelligence (AI)", name: "Super Grok AI Upgrade", price: 14.99, duration: "1 Month", note: "Activated natively on your profile using an official X Premium+ subscription." },
+
+            // GRAPHICS & DESIGN
+            { category: "graphics", catName: "Graphics & Design", name: "Adobe All Apps Premium", price: 44.49, duration: "1 Year", note: "Pre-created creative cloud profile equipped with 80GB Cloud storage space." },
+            { category: "graphics", catName: "Graphics & Design", name: "Canva Pro (Personal)", price: 1.89, duration: "1 Month", note: "Upgraded on your personal email ID with full access to assets." },
+            { category: "graphics", catName: "Graphics & Design", name: "Canva Pro Commercial", price: 11.49, duration: "12 Months", note: "Commercial grade professional design team system." },
+            { category: "graphics", catName: "Graphics & Design", name: "CapCut Pro Full Access", price: 2.49, duration: "1 Month", note: "Pre-allocated accounts supporting concurrent authorization on 3 devices." },
+            { category: "graphics", catName: "Graphics & Design", name: "Picsart Plus", price: 4.99, duration: "1 Month", note: "Direct premium unlock applied to your existing creative account." },
+            { category: "graphics", catName: "Graphics & Design", name: "Alight Motion Pro", price: 19.99, duration: "1 Year", note: "Complete motion design toolkit upgrade configured on your own account." },
+
+            // EDUCATION & VPN
+            { category: "education", catName: "Education & VPN", name: "Duolingo Super (Member)", price: 12.99, duration: "1 Year", note: "One dedicated slot in a legitimate Super Duolingo Family circle." },
+            { category: "education", catName: "Education & VPN", name: "Duolingo Super (Host)", price: 19.99, duration: "1 Year", note: "Get complete control over a Super Family structure consisting of 6 open slots." },
+            { category: "education", catName: "Education & VPN", name: "NordVPN Premium Protection", price: 22.49, duration: "1 Year", note: "Pre-configured credentials allowing simultaneous usage on 3 devices." },
+            { category: "education", catName: "Education & VPN", name: "HMA VPN Unlimited", price: 2.49, duration: "1 Month", note: "Flexible licensing provided via direct ID/Password or activation credentials." },
+            { category: "education", catName: "Education & VPN", name: "ExpressVPN Private Node", price: 2.49, duration: "1 Month", note: "Direct allocation of a private authenticated node account." },
+
+            // DATING & ADULT
+            { category: "dating", catName: "Dating & Adult 18+", name: "Phub Premium Accounts", price: 1.89, duration: "1 Month", note: "Dedicated premium profile delivered immediately from stock." },
+            { category: "dating", catName: "Dating & Adult 18+", name: "Bumble Premium", price: 4.69, duration: "1 Month", note: "Upgraded directly on your existing personal profile." },
+            { category: "dating", catName: "Dating & Adult 18+", name: "Tinder Gold Tier", price: 12.99, duration: "6 Months", note: "Official premium features unlocked directly on your profile." }
+        ];
+
+        const categoryMap = {
+            "all": "All Showcases",
+            "streaming": "Streaming",
+            "music": "Music & Discord",
+            "ai": "Artificial Intelligence",
+            "graphics": "Graphics & Design",
+            "education": "Education & VPN",
+            "dating": "Premium Dating"
+        };
+
+        let activeCategory = "all";
+        let searchQuery = "";
+        let selectedProduct = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            renderProducts();
+            initWebGL();
+            initCustomCursor();
+            lucide.createIcons();
+            
+            // GSAP Entry Animations
+            gsap.from(".serif-font", { duration: 1.5, opacity: 0, y: 30, ease: "power4.out", stagger: 0.1 });
+            gsap.from(".glass-card", { duration: 1, opacity: 0, y: 50, ease: "power3.out", stagger: 0.05, delay: 0.5 });
+        });
+
+        // 1. DYNAMIC CATEGORY CONTROLLERS
+        function initTabs() {
+            const container = document.getElementById('tabs-container');
+            container.innerHTML = '';
+
+            Object.keys(categoryMap).forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = `px-6 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all duration-300 ${
+                    activeCategory === key 
+                    ? 'bg-slate-950 text-white shadow-xl shadow-slate-950/10' 
+                    : 'bg-white/80 border border-slate-200 text-slate-600 hover:bg-white hover:text-green-600'
+                }`;
+                btn.textContent = categoryMap[key];
+                btn.onclick = () => {
+                    activeCategory = key;
+                    initTabs();
+                    renderProducts();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function filterProducts() {
+            searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            renderProducts();
+        }
+
+        // 2. CARD COMPILATION & 3D PHYSICS HOVER TILT
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => {
+                const matchCategory = activeCategory === 'all' || p.category === activeCategory;
+                const matchSearch = p.name.toLowerCase().includes(searchQuery) || p.note.toLowerCase().includes(searchQuery);
+                return matchCategory && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-24 text-center border border-dashed border-slate-200 rounded-[2rem] bg-white/40">
+                        <i data-lucide="info" class="w-8 h-8 mx-auto text-slate-300 mb-3"></i>
+                        <p class="text-xs font-bold tracking-wider uppercase text-slate-400">No parameters matching query found</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-[2rem] p-8 flex flex-col justify-between h-80 relative select-none cursor-pointer";
+                card.setAttribute('data-tilt', '');
+                card.onclick = () => openModal(p);
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-extrabold text-green-600 uppercase tracking-widest bg-green-50/50 border border-green-100/60 px-3 py-1 rounded-full">
+                                ${p.catName}
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                ${p.duration}
+                            </span>
+                        </div>
+                        <h3 class="serif-font text-2xl font-bold text-slate-900 leading-snug">${p.name}</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed font-medium line-clamp-2">${p.note}</p>
+                    </div>
+
+                    <div class="flex items-end justify-between border-t border-slate-100/80 pt-6 mt-auto">
+                        <div>
+                            <span class="block text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1">Standard Rate</span>
+                            <span class="text-2xl font-bold text-green-600">$${p.price.toFixed(2)}</span>
+                        </div>
+                        <div class="w-10 h-10 rounded-full border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-green-500 hover:border-green-300 transition-all duration-300">
+                            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+            bind3DTilt();
+        }
+
+        // PHYSICAL 3D CANVAS INERTIA FOR CARDS
+        function bind3DTilt() {
+            const cards = document.querySelectorAll('[data-tilt]');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((centerY - y) / centerY) * 15;
+                    const rotateY = ((x - centerX) / centerX) * 15;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                });
+            });
+        }
+
+        // 3. FLUID WEBGL SPACE (Lusion Aesthetics)
+        let scene, camera, renderer, particlesGroup;
+        let mouse3D = new THREE.Vector2(-999, -999);
+        let targetMouse3D = new THREE.Vector2(-999, -999);
+
+        function initWebGL() {
+            const container = document.getElementById('webgl-container');
+            const canvas = document.getElementById('webgl-canvas');
+
+            scene = new THREE.Scene();
+
+            // Setup orthographic projection approximations via perspective
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.z = 6;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xa7f3d0, 1.8);
+            dirLight.position.set(5, 8, 5);
+            scene.add(dirLight);
+
+            particlesGroup = new THREE.Group();
+            scene.add(particlesGroup);
+
+            // Create flat triangular geometries simulating folded origami paper
+            const geom = new THREE.ConeGeometry(0.08, 0.28, 3);
+
+            // Physically based transmission material to capture light glassy reflections
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0x22c55e,
+                roughness: 0.1,
+                metalness: 0.1,
+                clearcoat: 1.0,
+                transmission: 0.8, // Elegant paper translucency
+                thickness: 0.5,
+                side: THREE.DoubleSide,
+                flatShading: true
+            });
+
+            const count = 120;
+            const hues = [0.3, 0.35, 0.4];
+
+            for (let i = 0; i < count; i++) {
+                const mesh = new THREE.Mesh(geom, material.clone());
+                mesh.material.color.setHSL(hues[Math.floor(Math.random() * hues.length)], 0.7, 0.6);
+
+                mesh.position.set(
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 8,
+                    (Math.random() - 0.5) * 6
+                );
+
+                mesh.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+
+                const scale = 0.3 + Math.random() * 0.9;
+                mesh.scale.set(scale, scale, scale);
+
+                mesh.userData = {
+                    rotSpeedX: (Math.random() - 0.5) * 0.005,
+                    rotSpeedY: (Math.random() - 0.5) * 0.005,
+                    basePos: mesh.position.clone(),
+                    angle: Math.random() * Math.PI * 2,
+                    speed: 0.005 + Math.random() * 0.008
+                };
+
+                particlesGroup.add(mesh);
+            }
+
+            // Mouse coordinate processing
+            window.addEventListener('mousemove', (e) => {
+                targetMouse3D.x = (e.clientX / window.innerWidth) * 2 - 1;
+                targetMouse3D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function tick() {
+                requestAnimationFrame(tick);
+
+                // Fluid mouse coordinates interpolation
+                mouse3D.x += (targetMouse3D.x - mouse3D.x) * 0.05;
+                mouse3D.y += (targetMouse3D.y - mouse3D.y) * 0.05;
+
+                // Simple 3D projection representation
+                const projectionFactorX = mouse3D.x * 5;
+                const projectionFactorY = mouse3D.y * 3.5;
+                const refVector = new THREE.Vector3(projectionFactorX, projectionFactorY, 0);
+
+                particlesGroup.children.forEach(mesh => {
+                    mesh.rotation.x += mesh.userData.rotSpeedX;
+                    mesh.rotation.y += mesh.userData.rotSpeedY;
+
+                    // Wave floating motion
+                    mesh.userData.angle += mesh.userData.speed;
+                    mesh.position.y += Math.sin(mesh.userData.angle) * 0.002;
+                    mesh.position.x += Math.cos(mesh.userData.angle) * 0.001;
+
+                    // Fluid mouse displacement
+                    const dist = mesh.position.distanceTo(refVector);
+                    if (dist < 1.6) {
+                        const pushPower = (1.6 - dist) * 0.08;
+                        const direction = new THREE.Vector3().subVectors(mesh.position, refVector).normalize();
+                        mesh.position.addScaledVector(direction, pushPower);
+                    }
+
+                    // Pull back bounds
+                    const lim = 6;
+                    if (mesh.position.x > lim) mesh.position.x = -lim;
+                    if (mesh.position.x < -lim) mesh.position.x = lim;
+                    if (mesh.position.y > lim) mesh.position.y = -lim;
+                    if (mesh.position.y < -lim) mesh.position.y = lim;
+                });
+
+                renderer.render(scene, camera);
+            }
+            tick();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        // Simulate massive turbulence blow waves (Interactivity)
+        function trigger3DTurbulence() {
+            if (!particlesGroup) return;
+            particlesGroup.children.forEach(mesh => {
+                mesh.position.add(new THREE.Vector3(
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 3
+                ));
+            });
+            showToast("Atmospheric turbulence field triggered");
+        }
+
+        // 4. LUSION-STYLE CUSTOM FLUID CURSORS
+        function initCustomCursor() {
+            const dot = document.getElementById('cursor-dot');
+            const ring = document.getElementById('cursor-ring');
+
+            let cursorX = 0, cursorY = 0;
+            let targetX = 0, targetY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                targetX = e.clientX;
+                targetY = e.clientY;
+                // Move primary dot instantly
+                dot.style.left = `${targetX}px`;
+                dot.style.top = `${targetY}px`;
+            });
+
+            // Smooth interpolation for lag-ring
+            function updateRing() {
+                cursorX += (targetX - cursorX) * 0.15;
+                cursorY += (targetY - cursorY) * 0.15;
+                ring.style.left = `${cursorX}px`;
+                ring.style.top = `${cursorY}px`;
+                requestAnimationFrame(updateRing);
+            }
+            updateRing();
+
+            // Reveal cursor state over hover targets
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('.glass-card, button, a');
+                if (target) {
+                    ring.classList.remove('opacity-0');
+                    ring.classList.add('opacity-100', 'scale-125');
+                    if (target.classList.contains('glass-card')) {
+                        ring.textContent = 'VIEW';
+                        ring.classList.add('border-green-500', 'bg-green-50/10');
+                    } else {
+                        ring.textContent = 'LINK';
+                        ring.classList.add('border-green-500');
+                    }
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('.glass-card, button, a');
+                if (target) {
+                    ring.classList.add('opacity-0');
+                    ring.classList.remove('opacity-100', 'scale-125', 'border-green-500', 'bg-green-50/10');
+                    ring.textContent = '';
+                }
+            });
+        }
+
+        // 5. DETAIL INTERACTIVE MODALS
+        function openModal(p) {
+            selectedProduct = p;
+            document.getElementById('modal-cat').textContent = p.catName;
+            document.getElementById('modal-title').textContent = p.name;
+            document.getElementById('modal-note').textContent = p.note;
+            document.getElementById('modal-price').textContent = `$${p.price.toFixed(2)}`;
+            document.getElementById('modal-duration').textContent = `${p.duration} Tier`;
+
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+            modal.querySelector('.glass-panel').classList.remove('scale-95');
+            modal.querySelector('.glass-panel').classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('opacity-100');
+            modal.querySelector('.glass-panel').classList.add('scale-95');
+            modal.querySelector('.glass-panel').classList.remove('scale-100');
+            selectedProduct = null;
+        }
+
+        // Toast feedback system
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = text;
+            
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Clipboard query copy integration
+        function copyInquiry() {
+            if (!selectedProduct) return;
+            const queryText = `FOLIA & KRAFT Service Inquiry:\nProduct: ${selectedProduct.name}\nCategory: ${selectedProduct.catName}\nPrice Point: $${selectedProduct.price.toFixed(2)} (${selectedProduct.duration})`;
+            
+            navigator.clipboard.writeText(queryText).then(() => {
+                showToast("Service specifications copied to clipboard!");
+                closeModal();
+            }).catch(err => {
+                console.error("Failed copy operation:", err);
+            });
+        }
+    </script>
+</body>
+</html>
